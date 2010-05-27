@@ -31,7 +31,7 @@ def backup(cfg_path):
         args = ' '.join([
             'PYTHONPATH=%s/lib/python' % cfg['zope-prefix'],
             cfg['python'],
-            '%s/utilities/ZODBTools/repozo.py' % cfg['zope-prefix'],
+            '%s/bin/repozo.py' % cfg['zope-prefix'],
             '-BvzQ -r %s' % db_cfg['backup'],
             '-f %s' % db_cfg['datafs'],
         ])
