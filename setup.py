@@ -7,5 +7,5 @@ setup(name='edw.repozos',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    entry_points={'console_scripts': ['do_repozos = edw.repozos:main']},
+    entry_points={'console_scripts': ['do_repozos = edw.repozos.backup:main']},
 )
