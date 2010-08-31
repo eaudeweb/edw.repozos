@@ -52,7 +52,7 @@ def walk_dir(dir):
 
 def usage():
     print 'Usage:'
-    print '     ./clean_repozos [opts] PATH'
+    print '     do_cleanup [opts] PATH'
     print
     print 'Removes packed files from repozos directories'
     print
@@ -61,7 +61,7 @@ def usage():
     print '     -c = commit the changes (don\'t do a dry run - default. delete files instead'
     print '     -h = print this message'
 
-if __name__ == '__main__':
+def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "rch")
     except getopt.GetoptError, e:
@@ -81,3 +81,5 @@ if __name__ == '__main__':
     for p in args:
         walk_dir(p)
 
+if __name__ == '__main__':
+    main()

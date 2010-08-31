@@ -4,12 +4,14 @@ import os
 import sys
 from subprocess import Popen, PIPE, call
 
+test_folder = os.path.dirname(__file__)
+
 class CleanRepozoTestCase(unittest.TestCase):
     def test_noargs(self):
         """
         Tests for printing usage msg if no args are given
         """
-        result = Popen(['./clean_repozos.py'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup'], stdout=PIPE).communicate()[0]
         self.assertEquals(result.split('\n')[0], 'Usage:', 'No help printed')
         self.assertEquals(len(result.split('\n')), 10)
     
@@ -17,7 +19,7 @@ class CleanRepozoTestCase(unittest.TestCase):
         """
         Tests for printing usage msg if only -h is given
         """
-        result = Popen(['./clean_repozos.py', '-h'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '-h'], stdout=PIPE).communicate()[0]
         self.assertEquals(result.split('\n')[0], 'Usage:', 'No help printed')
         self.assertEquals(len(result.split('\n')), 10, 'Invalid message printed')
     
@@ -25,7 +27,7 @@ class CleanRepozoTestCase(unittest.TestCase):
         """
         Tests for printing usage msg if -h is given
         """
-        result = Popen(['./clean_repozos.py', '-rh'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '-rh'], stdout=PIPE).communicate()[0]
         self.assertEquals(result.split('\n')[0], 'Usage:', 'No help printed')
         self.assertEquals(len(result.split('\n')), 10, 'Invalid message printed')
 
@@ -33,7 +35,7 @@ class CleanRepozoTestCase(unittest.TestCase):
         """
         Tests for directories with no repozos files
         """
-        result = Popen(['./clean_repozos.py', '1_data'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '1_data'], stdout=PIPE, cwd=test_folder).communicate()[0]
         self.assertEquals(result.split('\n')[0], 'Directory 1_data contains no repozos files')
         self.assertEquals(len(result.split('\n')), 2, 'Invalid message printed')
 
@@ -41,7 +43,7 @@ class CleanRepozoTestCase(unittest.TestCase):
         """
         Tests for recursive option handling.
         """
-        result = Popen(['./clean_repozos.py', '-r', '1_data'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '-r', '1_data'], stdout=PIPE, cwd=test_folder).communicate()[0]
         self.assertEquals(result.split('\n')[0], 'Directory 1_data contains no repozos files')
         self.assertEquals(len(result.split('\n')), 12, 'Invalid message printed')
 
@@ -49,7 +51,7 @@ class CleanRepozoTestCase(unittest.TestCase):
         """
         Tests for deletion (only dry run) of files.
         """
-        result = Popen(['./clean_repozos.py', '1_data/1'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '1_data/1'], stdout=PIPE, cwd=test_folder).communicate()[0]
         for f in result.split('\n')[1:]:
             if f:
                 self.assertTrue(f.startswith('Will delete '), 'Will not delete deleteable file')
@@ -59,7 +61,7 @@ class CleanRepozoTestCase(unittest.TestCase):
         """
         Tests for clean directory.
         """
-        result = Popen(['./clean_repozos.py', '2_data/2'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '2_data/2'], stdout=PIPE, cwd=test_folder).communicate()[0]
         self.assertEquals(result.split('\n')[0], 'Directory 2_data/2 clean', 'Clean directory reported as dirty')
         self.assertEquals(len(result.split('\n')), 2, 'Invalid message printed')
 
@@ -67,7 +69,7 @@ class CleanRepozoTestCase(unittest.TestCase):
         """
         Tests for ignoring invalid files.
         """
-        result = Popen(['./clean_repozos.py', '1_data/1'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '1_data/1'], stdout=PIPE, cwd=test_folder).communicate()[0]
         self.assertTrue(result.split('\n')[0].startswith('Ignoring file '), 'First file should be ignored')
         self.assertEquals(len(result.split('\n')), 11, 'Invalid message printed')
 
@@ -77,13 +79,13 @@ class CleanRepozoTestCase(unittest.TestCase):
         files from a copy and checks whether the subsequent dry run outputs
         one more line, claiming that the directory is clean.
         """
-        call(['mkdir', '-p', '/tmp'])
-        call(['cp', '-r', '1_data/', 'tmp'])
+        call(['mkdir', '-p', 'tmp'], cwd=test_folder)
+        call(['cp', '-r', '1_data/', 'tmp'], cwd=test_folder)
 
-        result = Popen(['./clean_repozos.py', '-rc', 'tmp/'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '-rc', 'tmp/'], stdout=PIPE, cwd=test_folder).communicate()[0]
         l = len(result.split('\n'))
 
-        result = Popen(['./clean_repozos.py', '-r', 'tmp/'], stdout=PIPE).communicate()[0]
+        result = Popen(['do_cleanup', '-r', 'tmp/'], stdout=PIPE, cwd=test_folder).communicate()[0]
         self.assertEquals(len(result.split('\n')), 1 + l, 
                 "The directory was not cleaned or more files were added to it during the test")
 
@@ -95,7 +97,7 @@ class CleanRepozoTestCase(unittest.TestCase):
         self.assertTrue(ok, "No line saying that the directory is clean")
 
     def tearDown(self):
-        call(['rm', '-rf', 'tmp'])
+        call(['rm', '-rf', 'tmp'], cwd=test_folder)
 
 
 def test_suite():
