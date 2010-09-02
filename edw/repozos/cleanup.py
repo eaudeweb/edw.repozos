@@ -62,6 +62,7 @@ def usage():
     print '     -h = print this message'
 
 def main():
+    global rec, commit
     try:
         opts, args = getopt.getopt(sys.argv[1:], "rch")
     except getopt.GetoptError, e:
